@@ -159,7 +159,7 @@ These keywords increase indentation when found at the
 end of a line.")
 
 (defconst mscl-decrease-indent-keywords-bol
-  (regexp-opt '("else" "elseif" "endif" "end" "loop" "next" "until" "wend" "endwhile")
+  (regexp-opt '("else" "elseif" "endif" "loop" "next" "until" "wend" "endwhile")
               'symbols)
   "Regexp string of keywords that decrease indentation.
 These keywords decrease indentation when found at the
@@ -202,7 +202,7 @@ beginning of a line or after a statement separator (:).")
 
 (defconst mscl-keyword-regexp
   (regexp-opt '("version" "set" "def" "defbol" "defdbl" "defint" "defsng" "defstr"
-                "declare" "do" "else" "elseif" "end" "endif" "error" "exit" "fn"
+                "declare" "do" "else" "elseif"  "endif" "error" "exit" "fn"
                 "for" "gosub" "goto" "if" "loop" "next" "on" "step" "repeat"
                 "return" "sub" "then" "to" "until" "wend" "while" "endwhile")
               'symbols)
