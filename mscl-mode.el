@@ -182,7 +182,8 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as line numbers.")
 
 (defconst mscl-constant-regexp
-  (regexp-opt '("_pwk_files_path" "_pi" "_install_path" "_temp_path" "_userconfig_path" )
+  (regexp-opt '("$_pwk_files_path"  "$_install_path" "$_temp_path"
+                "$_userconfig_path" "$_app_nb_bit" "$_pi")
               'symbols)
   "Regexp string of symbols to highlight as constants.")
 
