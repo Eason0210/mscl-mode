@@ -66,7 +66,7 @@
 
 ;;; Change Log:
 
-;;  0.4.2  2018-09-19  Lookup of dimmed variables.
+;;  0.4.2  2018-09-19  Lookup of declared variables.
 ;;  0.4.1  2018-06-12  Highlighting, indentation and lookup of labels.
 ;;  0.4.0  2018-05-25  Added goto line number.
 ;;  0.3.3  2018-05-17  Fixed endless loop bug.
@@ -182,7 +182,7 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as line numbers.")
 
 (defconst mscl-constant-regexp
-  (regexp-opt '("version" "false" "true")
+  (regexp-opt '("false" "true")
               'symbols)
   "Regexp string of symbols to highlight as constants.")
 
@@ -201,8 +201,8 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as builtins.")
 
 (defconst mscl-keyword-regexp
-  (regexp-opt '("as" "call" "def" "defbol" "defdbl" "defint" "defsng" "defstr"
-                "dim" "do" "else" "elseif" "end" "endif" "error" "exit" "fn"
+  (regexp-opt '("version" "set" "def" "defbol" "defdbl" "defint" "defsng" "defstr"
+                "declare" "do" "else" "elseif" "end" "endif" "error" "exit" "fn"
                 "for" "gosub" "goto" "if" "loop" "next" "on" "step" "repeat"
                 "return" "sub" "then" "to" "until" "wend" "while" "endwhile")
               'symbols)
@@ -654,7 +654,7 @@ If VARIABLE is not found, return nil."
   (save-excursion
     (goto-char (point-min))
     (let (positions)
-      (while (re-search-forward (concat "\\_<dim\\_>.*\\_<\\(" variable "\\)\\_>") nil t)
+      (while (re-search-forward (concat "\\_<declare\\_>.*\\_<\\(" variable "\\)\\_>") nil t)
         (push (match-beginning 1) positions))
       positions)))
 
