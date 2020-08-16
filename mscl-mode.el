@@ -204,7 +204,7 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as keywords.")
 
 (defconst mscl-type-regexp
-  (regexp-opt '( "double" "integer" "string")
+  (regexp-opt '( "float")
               'symbols)
   "Regexp string of symbols to highlight as types.")
 
