@@ -690,7 +690,7 @@ and `mscl-line-number-cols'.
   :group 'mscl
   (add-hook 'xref-backend-functions #'mscl-xref-backend nil t)
   (setq-local indent-line-function 'mscl-indent-line)
-  (setq-local comment-start "'")
+  (setq-local comment-start "#")
   (setq-local font-lock-defaults '(mscl-font-lock-keywords nil t))
   (unless font-lock-mode
     (font-lock-mode 1)))
