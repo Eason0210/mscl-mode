@@ -182,15 +182,13 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as line numbers.")
 
 (defconst mscl-constant-regexp
-  (regexp-opt '("false" "true")
+  (regexp-opt '("_pwk_files_path" "_pi" "_install_path" "_temp_path" "_userconfig_path" )
               'symbols)
   "Regexp string of symbols to highlight as constants.")
 
 (defconst mscl-function-regexp
-  (regexp-opt '("abs" "asc" "atn" "cdbl" "cint" "chr$" "cos" "exp"
-                "fix" "instr" "int" "lcase$" "len" "left$" "log" "log10" "mid$"
-                "pi" "right$" "rnd" "sgn" "sin" "sqrt" "str$" "tab" "tan"
-                "ucase$" "usr" "val" "expr" "expr_i" "size")
+  (regexp-opt '("abs" "atan" "atan2" "asin" "acos" "cos" "size"
+                "log10" "sin" "sqrt" "tan" "expr" "expr_i" "string_decimal" )
               'symbols)
   "Regexp string of symbols to highlight as functions.")
 
@@ -201,7 +199,7 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as builtins.")
 
 (defconst mscl-keyword-regexp
-  (regexp-opt '("version" "set" "def" "defbol" "defdbl" "defint" "defsng" "defstr"
+  (regexp-opt '("version" "set" "def" "defbol" "break" "continue" "defsng" "defstr"
                 "declare" "do" "else" "elseif"  "endif" "error" "exit" "fn"
                 "for" "gosub" "goto" "if" "loop" "next" "on" "step" "repeat"
                 "return" "sub" "then" "to" "until" "wend" "while" "endwhile")
