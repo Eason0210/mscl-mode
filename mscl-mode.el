@@ -145,21 +145,21 @@ empty lines are never numbered."
   "The current version of `mscl-mode'.")
 
 (defconst mscl-increase-indent-keywords-bol
-  (regexp-opt '("if" "elseif""do" "for" "repeat" "sub" "while")
+  (regexp-opt '("if" "elseif" "while")
               'symbols)
   "Regexp string of keywords that increase indentation.
 These keywords increase indentation when found at the
 beginning of a line.")
 
 (defconst mscl-increase-indent-keywords-eol
-  (regexp-opt '("else" "then")
+  (regexp-opt '("else")
               'symbols)
   "Regexp string of keywords that increase indentation.
 These keywords increase indentation when found at the
 end of a line.")
 
 (defconst mscl-decrease-indent-keywords-bol
-  (regexp-opt '("else" "elseif" "endif" "loop" "next" "until" "wend" "endwhile")
+  (regexp-opt '("else" "elseif" "endif" "endwhile")
               'symbols)
   "Regexp string of keywords that decrease indentation.
 These keywords decrease indentation when found at the
@@ -198,10 +198,8 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as builtins.")
 
 (defconst mscl-keyword-regexp
-  (regexp-opt '("version" "set" "def" "defbol" "break" "continue" "defsng" "defstr"
-                "declare" "do" "else" "elseif"  "endif" "error" "exit" "fn"
-                "for" "gosub" "goto" "if" "loop" "next" "on" "step" "repeat"
-                "return" "sub" "then" "to" "until" "wend" "while" "endwhile")
+  (regexp-opt '("version" "set" "break" "continue" "declare"
+                "else" "elseif"  "endif" "if" "while" "endwhile")
               'symbols)
   "Regexp string of symbols to highlight as keywords.")
 
