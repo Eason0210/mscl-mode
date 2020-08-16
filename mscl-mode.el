@@ -193,8 +193,7 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as functions.")
 
 (defconst mscl-builtin-regexp
-  (regexp-opt '("and" "cls" "data"  "let" "mat" "mod" "not" "or"
-                "peek" "poke" "print" "read" "restore" "troff" "tron" "xor")
+  (regexp-opt '("and" "not" "or")
               'symbols)
   "Regexp string of symbols to highlight as builtins.")
 
