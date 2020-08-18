@@ -122,7 +122,7 @@ If nil, auto-numbering is turned off.  If not nil, this should be an
 integer defining the increment between line numbers, 10 is a traditional
 choice."
   :type '(choice (const :tag "Off" nil)
-		 integer)
+                 integer)
   :group 'mscl)
 
 (defcustom mscl-renumber-increment 10
@@ -164,6 +164,10 @@ end of a line.")
   "Regexp string of keywords that decrease indentation.
 These keywords decrease indentation when found at the
 beginning of a line or after a statement separator (:).")
+
+(defconst mscl-backslash-keywords-eol
+  (regexp-opt '("\\") 'sysbols)
+  "find backslash in the end of line")
 
 (defconst mscl-comment-and-string-faces
   '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-string-face)
@@ -269,6 +273,21 @@ Code inside a block is indented `mscl-indent-offset' extra characters."
     (goto-char (line-beginning-position))
     (looking-at mscl-label-regexp)))
 
+
+(defun mscl-backslash-p ()
+  "Return non-nil if current line does end with a backslash."
+  (save-excursion
+    (goto-char (line-end-position))
+    (looking-back mscl-backslash-keywords-eol)))
+
+(defun mscl-backslash-backward-p ()
+  "Search backward from point for a line end with a backslash."
+  (save-excursion
+    (beginning-of-line)
+    (skip-chars-backward " \t\n")
+    (looking-back mscl-backslash-keywords-eol)))
+
+
 (defun mscl-comment-or-string-p ()
   "Return non-nil if point is in a comment or string."
   (let ((faces (get-text-property (point) 'face)))
@@ -300,7 +319,10 @@ while other keywords do it when found at the beginning of a line."
     (mscl-code-search-backward)
     (unless (bobp)
       ;; Keywords at the end of the line
-      (if (mscl-match-symbol-at-point-p mscl-increase-indent-keywords-eol)
+      (if (or (mscl-match-symbol-at-point-p mscl-increase-indent-keywords-eol)
+              ;; when find "\" in the end of current line but not in previous line.
+              (and (mscl-backslash-p)
+                   (not (mscl-backslash-backward-p))))
           't
         ;; Keywords at the beginning of the line
         (beginning-of-line)
@@ -321,7 +343,10 @@ of a line or statement, see `mscl-decrease-indent-keywords-bol'."
           (while (and (not match)
                       (re-search-forward ":[ \t\n]*" (point-at-eol) t))
             (setq match (mscl-match-symbol-at-point-p mscl-decrease-indent-keywords-bol)))
-          match))))
+          (or match
+              ;; when find "\" in the end of previous line but not in current line.
+              (and (mscl-backslash-backward-p)
+                   (not (mscl-backslash-p))))))))
 
 (defun mscl-current-indent ()
   "Return the indent column of the current code line.
@@ -479,26 +504,26 @@ are available between the existing lines, just increment by one,
 even if that creates overlaps."
   (interactive)
   (let* ((current-line-number (mscl-current-line-number))
-	 (next-line-number (save-excursion
-			     (end-of-line)
-			     (and (forward-word 1)
-				  (mscl-current-line-number))))
-	 (new-line-number (and current-line-number
-			       mscl-auto-number
-			       (+ current-line-number mscl-auto-number))))
+         (next-line-number (save-excursion
+                             (end-of-line)
+                             (and (forward-word 1)
+                                  (mscl-current-line-number))))
+         (new-line-number (and current-line-number
+                               mscl-auto-number
+                               (+ current-line-number mscl-auto-number))))
     (mscl-indent-line)
     (newline)
     (when (and new-line-number
-	       (not (zerop mscl-line-number-cols)))
+               (not (zerop mscl-line-number-cols)))
       (when (and next-line-number
-		 (<= next-line-number
-		     new-line-number))
-	(setq new-line-number
-	      (+ current-line-number
-		 (truncate (- next-line-number current-line-number)
-			   2)))
-	(when (= new-line-number current-line-number)
-	  (setq new-line-number (1+ new-line-number))))
+                 (<= next-line-number
+                     new-line-number))
+        (setq new-line-number
+              (+ current-line-number
+                 (truncate (- next-line-number current-line-number)
+                           2)))
+        (when (= new-line-number current-line-number)
+          (setq new-line-number (1+ new-line-number))))
       (insert (int-to-string new-line-number)))
     (mscl-indent-line)))
 
@@ -507,14 +532,14 @@ even if that creates overlaps."
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward "\\(go\\(sub\\|to\\)\\|then\\)[ \t]*" nil t)
-	(while (looking-at "\\([0-9]+\\)\\(,[ \t]*\\)?")
-	  (let* ((target-string (match-string-no-properties 1))
-		 (target (string-to-number target-string))
-		 (jmp-marker (copy-marker (+ (point) (length target-string)))))
-	    (unless (gethash target jump-targets)
-	      (puthash target nil jump-targets))
-	    (push jmp-marker (gethash target jump-targets))
-	    (forward-char (length (match-string 0)))))))
+        (while (looking-at "\\([0-9]+\\)\\(,[ \t]*\\)?")
+          (let* ((target-string (match-string-no-properties 1))
+                 (target (string-to-number target-string))
+                 (jmp-marker (copy-marker (+ (point) (length target-string)))))
+            (unless (gethash target jump-targets)
+              (puthash target nil jump-targets))
+            (push jmp-marker (gethash target jump-targets))
+            (forward-char (length (match-string 0)))))))
     jump-targets))
 
 (defun mscl-renumber (start increment)
@@ -541,52 +566,52 @@ If `mscl-renumber-unnumbered-lines' is non-nil, all non-empty
 lines will get numbers.  If it is nil, only lines that already
 have numbers are included in the renumbering."
   (interactive (list (let ((default (save-excursion
-				      (goto-char (if (use-region-p)
-						     (region-beginning)
-						   (point-min)))
-				      (or (mscl-current-line-number)
-					  mscl-renumber-increment))))
-		       (string-to-number (read-string
-					  (format "Renumber, starting with (default %d): "
-						  default)
-					  nil nil
-					  (int-to-string default))))
-		     (string-to-number (read-string
-					(format "Increment (default %d): "
-						mscl-renumber-increment)
-					nil nil
-					(int-to-string mscl-renumber-increment)))))
+                                      (goto-char (if (use-region-p)
+                                                     (region-beginning)
+                                                   (point-min)))
+                                      (or (mscl-current-line-number)
+                                          mscl-renumber-increment))))
+                       (string-to-number (read-string
+                                          (format "Renumber, starting with (default %d): "
+                                                  default)
+                                          nil nil
+                                          (int-to-string default))))
+                     (string-to-number (read-string
+                                        (format "Increment (default %d): "
+                                                mscl-renumber-increment)
+                                        nil nil
+                                        (int-to-string mscl-renumber-increment)))))
   (if (zerop mscl-line-number-cols)
       (message "No room for numbers.  Please adjust `mscl-line-number-cols'.")
     (let ((new-line-number start)
-	  (jump-list (mscl-find-jumps))
-	  (point-start (if (use-region-p) (region-beginning) (point-min)))
-	  (point-end (if (use-region-p) (copy-marker (region-end)) (copy-marker (point-max)))))
+          (jump-list (mscl-find-jumps))
+          (point-start (if (use-region-p) (region-beginning) (point-min)))
+          (point-end (if (use-region-p) (copy-marker (region-end)) (copy-marker (point-max)))))
       (save-excursion
-	(goto-char point-start)
-	(while (< (point) point-end)
-	  (unless (looking-at "^[ \t]*$")
-	    (let ((current-line-number (string-to-number (mscl-remove-line-number))))
-	      (when (or mscl-renumber-unnumbered-lines
-			(not (zerop current-line-number)))
-		(let ((jump-locations (gethash current-line-number jump-list)))
-		  (save-excursion
-		    (dolist (p jump-locations)
-		      (goto-char (marker-position p))
-		      (set-marker p nil)
-		      (backward-kill-word 1)
-		      (insert (int-to-string new-line-number)))))
-		(indent-line-to (mscl-calculate-indent))
-		(beginning-of-line)
-		(insert (mscl-format-line-number new-line-number))
-		(setq new-line-number (+ new-line-number increment)))))
-	  (forward-line 1)))
+        (goto-char point-start)
+        (while (< (point) point-end)
+          (unless (looking-at "^[ \t]*$")
+            (let ((current-line-number (string-to-number (mscl-remove-line-number))))
+              (when (or mscl-renumber-unnumbered-lines
+                        (not (zerop current-line-number)))
+                (let ((jump-locations (gethash current-line-number jump-list)))
+                  (save-excursion
+                    (dolist (p jump-locations)
+                      (goto-char (marker-position p))
+                      (set-marker p nil)
+                      (backward-kill-word 1)
+                      (insert (int-to-string new-line-number)))))
+                (indent-line-to (mscl-calculate-indent))
+                (beginning-of-line)
+                (insert (mscl-format-line-number new-line-number))
+                (setq new-line-number (+ new-line-number increment)))))
+          (forward-line 1)))
       (set-marker point-end nil)
       (maphash (lambda (target sources)
-		 (dolist (m sources)
-		   (when (marker-position m)
-		     (set-marker m nil))))
-	       jump-list))))
+                 (dolist (m sources)
+                   (when (marker-position m)
+                     (set-marker m nil))))
+               jump-list))))
 
 ;; ----------------------------------------------------------------------------
 ;; Xref backend:
@@ -624,7 +649,7 @@ If no definitions can be found, return nil."
       (when label
         (push (mscl-xref-make-xref (format "%s (label)" identifier) (current-buffer) label) xrefs))
       (cl-loop for variable in variables do
-            (push (mscl-xref-make-xref (format "%s (variable)" identifier) (current-buffer) variable) xrefs))
+               (push (mscl-xref-make-xref (format "%s (variable)" identifier) (current-buffer) variable) xrefs))
       xrefs)))
 
 (defun mscl-xref-find-line-number (line-number)
