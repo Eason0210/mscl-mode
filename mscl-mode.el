@@ -721,7 +721,7 @@ and `mscl-line-number-cols'.
   (unless font-lock-mode
     (font-lock-mode 1)))
 
-;;;###autoload (add-to-list 'auto-mode-alist '("\\.pwmacro\\'" . mscl-mode))
+;;;###autoload (add-to-list 'auto-mode-alist '("\\.pwx?macro\\'" . mscl-mode))
 
 ;; ----------------------------------------------------------------------------
 
