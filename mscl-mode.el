@@ -24,20 +24,12 @@
 
 ;;; Commentary:
 
-;; This package provides a major mode for editing MSCL code. Features
+;; This package provides a major mode for editing MSCL code.  Features
 ;; include syntax highlighting and indentation, as well as support for
 ;; auto-numbering and renumering of code lines.
 ;;
 ;; You can format the region, or the entire buffer, by typing C-c C-f.
 ;;
-;; When line numbers are turned or, hitting the return key will insert
-;; a new line starting with a fresh line number. Typing C-c C-r will
-;; renumber all lines in the region, or the entire buffer, including
-;; any jumps in the code.
-;;
-;; Type M-. to lookup the line number, label, or variable at point,
-;; and type M-, to go back again. See also function
-;; `xref-find-definitions'.
 
 ;; Installation:
 
@@ -50,19 +42,12 @@
 ;; Configuration:
 
 ;; You can customize the indentation of code blocks, see variable
-;; `mscl-indent-offset'. The default value is 4.
+;; `mscl-indent-offset'.  The default value is 4.
 ;;
 ;; Formatting is also affected by the customizable variables
 ;; `mscl-delete-trailing-whitespace' and `delete-trailing-lines'
 ;; (from simple.el).
 ;;
-;; You can also customize the number of columns to use for line
-;; numbers, see variable `mscl-line-number-cols'. The default value
-;; is 0, which means not using line numbers at all.
-;;
-;; The other line number features can be configured by customizing
-;; the variables `mscl-auto-number', `mscl-renumber-increment' and
-;; `mscl-renumber-unnumbered-lines'.
 
 ;;; Change Log:
 
@@ -107,33 +92,12 @@ Statements inside a block are indented this number of columns."
 (defcustom mscl-line-number-cols 0
   "*Specifies the number of columns to allocate to line numbers.
 This number should include the single space between the line number and
-the actual code. Set this variable to 0 if you do not use line numbers."
+the actual code.  Set this variable to 0 if you do not use line numbers."
   :type 'integer
   :group 'mscl)
 
 (defcustom mscl-delete-trailing-whitespace 't
   "*Delete trailing whitespace while formatting code."
-  :type 'boolean
-  :group 'mscl)
-
-(defcustom mscl-auto-number nil
-  "*Specifies auto-numbering increments.
-If nil, auto-numbering is turned off.  If not nil, this should be an
-integer defining the increment between line numbers, 10 is a traditional
-choice."
-  :type '(choice (const :tag "Off" nil)
-                 integer)
-  :group 'mscl)
-
-(defcustom mscl-renumber-increment 10
-  "*Default auto-numbering increment."
-  :type 'integer
-  :group 'mscl)
-
-(defcustom mscl-renumber-unnumbered-lines t
-  "*If non-nil, lines without line numbers are also renumbered.
-If nil, lines without line numbers are left alone. Completely
-empty lines are never numbered."
   :type 'boolean
   :group 'mscl)
 
@@ -167,7 +131,7 @@ beginning of a line or after a statement separator (:).")
 
 (defconst mscl-backslash-keywords-eol
   (regexp-opt '("\\") 'sysbols)
-  "find backslash in the end of line")
+  "Find backslash in the end of line.")
 
 (defconst mscl-comment-and-string-faces
   '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-string-face)
@@ -233,21 +197,17 @@ beginning of a line or after a statement separator (:).")
   (interactive)
   ;; If line needs indentation
   (when (not (mscl-code-indented-correctly-p))
-    ;; Set mscl-line-number-cols to reflect the actual code
-    (let* ((actual-line-number-cols 0)
-           (mscl-line-number-cols
-            (max actual-line-number-cols mscl-line-number-cols)))
-      ;; Calculate new indentation
-      (let* ((original-col (- (current-column) mscl-line-number-cols))
-             (original-indent-col (mscl-current-indent))
-             (calculated-indent-col (mscl-calculate-indent)))
-        ;; Indent line
-        (indent-line-to calculated-indent-col)
-        ;; Move point to a good place after indentation
-        (goto-char (+ (point-at-bol)
-                      calculated-indent-col
-                      (max (- original-col original-indent-col) 0)
-                      mscl-line-number-cols))))))
+    ;; Calculate new indentation
+    (let* ((original-col (current-column))
+           (original-indent-col (mscl-current-indent))
+           (calculated-indent-col (mscl-calculate-indent)))
+      ;; Indent line
+      (indent-line-to calculated-indent-col)
+      ;; Move point to a good place after indentation
+      (goto-char (+ (point-at-bol)
+                    calculated-indent-col
+                    (max (- original-col original-indent-col) 0)
+                    mscl-line-number-cols)))))
 
 (defun mscl-calculate-indent ()
   "Calculate the indent for the current line of code.
@@ -516,7 +476,7 @@ If VARIABLE is not found, return nil."
 (define-derived-mode mscl-mode prog-mode "MSCL"
   "Major mode for editing MSCL code.
 Commands:
-TAB indents for MSCL code. RET will insert a new line starting
+TAB indents for MSCL code.  RET will insert a new line starting
 with a fresh line number if line numbers are turned on.
 
 \\{mscl-mode-map}"
