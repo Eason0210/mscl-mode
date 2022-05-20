@@ -366,25 +366,13 @@ trailing lines at the end of the buffer if the variable
 Return a list of xref objects with the definitions found.
 If no definitions can be found, return nil."
   (let (xrefs)
-    (let ((line-number (mscl-xref-find-line-number identifier))
-          (label (mscl-xref-find-label identifier))
+    (let ((label (mscl-xref-find-label identifier))
           (variables (mscl-xref-find-variable identifier)))
-      (when line-number
-        (push (mscl-xref-make-xref (format "%s (line number)" identifier) (current-buffer) line-number) xrefs))
       (when label
         (push (mscl-xref-make-xref (format "%s (label)" identifier) (current-buffer) label) xrefs))
       (cl-loop for variable in variables do
                (push (mscl-xref-make-xref (format "%s (variable)" identifier) (current-buffer) variable) xrefs))
       xrefs)))
-
-(defun mscl-xref-find-line-number (line-number)
-  "Return the buffer position where LINE-NUMBER is defined.
-If LINE-NUMBER is not found, return nil."
-  (save-excursion
-    (when (string-match "[0-9]+" line-number)
-      (goto-char (point-min))
-      (when (re-search-forward (concat "^\\s-*\\(" line-number "\\)\\s-") nil t)
-        (match-beginning 1)))))
 
 (defun mscl-xref-find-label (label)
   "Return the buffer position where LABEL is defined.
