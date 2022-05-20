@@ -72,7 +72,7 @@ Statements inside a block are indented this number of columns."
   :type 'integer
   :group 'mscl)
 
-(defcustom mscl-delete-trailing-whitespace 't
+(defcustom mscl-delete-trailing-whitespace nil
   "*Delete trailing whitespace while formatting code."
   :type 'boolean
   :group 'mscl)
