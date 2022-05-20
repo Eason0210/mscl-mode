@@ -45,7 +45,7 @@
 ;; the following lines of code to your init file:
 ;;
 ;; (autoload 'mscl-mode "mscl-mode" "Major mode for editing MSCL code." t)
-;; (add-to-list 'auto-mode-alist '("\\.pwmacro\\'" . mscl-mode))
+;; (add-to-list 'auto-mode-alist '("\\.pwx?macro\\'" . mscl-mode))
 
 ;; Configuration:
 
@@ -232,21 +232,17 @@ beginning of a line or after a statement separator (:).")
   "Indent the current line of code, see function `mscl-calculate-indent'."
   (interactive)
   ;; If line needs indentation
-  (when (or (not (mscl-line-number-indented-correctly-p))
-            (not (mscl-code-indented-correctly-p)))
+  (when (not (mscl-code-indented-correctly-p))
     ;; Set mscl-line-number-cols to reflect the actual code
-    (let* ((actual-line-number-cols
-            (if (not (mscl-has-line-number-p))
-                0
-              (let ((line-number (mscl-current-line-number)))
-                (1+ (length (number-to-string line-number))))))
+    (let* ((actual-line-number-cols 0)
            (mscl-line-number-cols
             (max actual-line-number-cols mscl-line-number-cols)))
       ;; Calculate new indentation
       (let* ((original-col (- (current-column) mscl-line-number-cols))
              (original-indent-col (mscl-current-indent))
              (calculated-indent-col (mscl-calculate-indent)))
-        (mscl-indent-line-to calculated-indent-col)
+        ;; Indent line
+        (indent-line-to calculated-indent-col)
         ;; Move point to a good place after indentation
         (goto-char (+ (point-at-bol)
                       calculated-indent-col
@@ -278,14 +274,14 @@ Code inside a block is indented `mscl-indent-offset' extra characters."
   "Return non-nil if current line does end with a backslash."
   (save-excursion
     (goto-char (line-end-position))
-    (looking-back mscl-backslash-keywords-eol)))
+    (looking-back mscl-backslash-keywords-eol nil)))
 
 (defun mscl-backslash-backward-p ()
   "Search backward from point for a line end with a backslash."
   (save-excursion
     (beginning-of-line)
     (skip-chars-backward " \t\n")
-    (looking-back mscl-backslash-keywords-eol)))
+    (looking-back mscl-backslash-keywords-eol nil)))
 
 
 (defun mscl-comment-or-string-p ()
@@ -367,60 +363,12 @@ If the current line is the first line, then return 0."
     (cond ((bobp) 0)
           (t (mscl-current-indent)))))
 
-(defun mscl-line-number-indented-correctly-p ()
-  "Return non-nil if line number is indented correctly.
-If there is no line number, also return non-nil."
-  (save-excursion
-    (if (not (mscl-has-line-number-p))
-        t
-      (beginning-of-line)
-      (skip-chars-forward " \t" (point-at-eol))
-      (skip-chars-forward "0-9" (point-at-eol))
-      (and (looking-at "[ \t]")
-           (= (point) (+ (point-at-bol) mscl-line-number-cols -1))))))
-
 (defun mscl-code-indented-correctly-p ()
   "Return non-nil if code is indented correctly."
   (save-excursion
     (let ((original-indent-col (mscl-current-indent))
           (calculated-indent-col (mscl-calculate-indent)))
       (= original-indent-col calculated-indent-col))))
-
-(defun mscl-has-line-number-p ()
-  "Return non-nil if the current line has a line number."
-  (save-excursion
-    (beginning-of-line)
-    (skip-chars-forward " \t" (point-at-eol))
-    (looking-at "[0-9]")))
-
-(defun mscl-remove-line-number ()
-  "Remove and return the line number of the current line.
-After calling this function, the current line will begin with the first
-non-blank character after the line number."
-  (if (not (mscl-has-line-number-p))
-      ""
-    (beginning-of-line)
-    (re-search-forward "\\([0-9]+\\)" (point-at-eol) t)
-    (let ((line-number (match-string-no-properties 1)))
-      (delete-region (point-at-bol) (match-end 1))
-      line-number)))
-
-(defun mscl-format-line-number (number)
-  "Format NUMBER as a line number."
-  (if (= mscl-line-number-cols 0)
-      number
-    (format (concat "%" (number-to-string (- mscl-line-number-cols 1)) "s ") number)))
-
-(defun mscl-indent-line-to (column)
-  "Indent current line to COLUMN, also considering line numbers."
-  ;; Remove line number
-  (let* ((line-number (mscl-remove-line-number))
-         (formatted-number (mscl-format-line-number line-number)))
-    ;; Indent line
-    (indent-line-to column)
-    ;; Add line number again
-    (beginning-of-line)
-    (insert formatted-number)))
 
 (defun mscl-electric-colon ()
   "Insert a colon and re-indent line."
@@ -476,142 +424,6 @@ trailing lines at the end of the buffer if the variable
         (while (eq (char-before) ?\n)
           (delete-char -1))
         ))))
-
-;; ----------------------------------------------------------------------------
-;; Line numbering:
-;; ----------------------------------------------------------------------------
-
-(defun mscl-current-line-number ()
-  "Return line number of current line, or nil if no line number."
-  (save-excursion
-    (when (mscl-has-line-number-p)
-      (beginning-of-line)
-      (re-search-forward "\\([0-9]+\\)" (point-at-eol) t)
-      (let ((line-number (match-string-no-properties 1)))
-        (string-to-number line-number)))))
-
-(defun mscl-newline-and-number ()
-  "Insert a newline and indent to the proper level.
-If the current line starts with a line number, and auto-numbering is
-turned on (see `mscl-auto-number'), insert the next automatic number
-in the beginning of the line.
-
-If opening a new line between two numbered lines, and the next
-automatic number would be >= the line number of the existing next
-line, we try to find a midpoint between the two existing lines
-and use that as the next number.  If no more unused line numbers
-are available between the existing lines, just increment by one,
-even if that creates overlaps."
-  (interactive)
-  (let* ((current-line-number (mscl-current-line-number))
-         (next-line-number (save-excursion
-                             (end-of-line)
-                             (and (forward-word 1)
-                                  (mscl-current-line-number))))
-         (new-line-number (and current-line-number
-                               mscl-auto-number
-                               (+ current-line-number mscl-auto-number))))
-    (mscl-indent-line)
-    (newline)
-    (when (and new-line-number
-               (not (zerop mscl-line-number-cols)))
-      (when (and next-line-number
-                 (<= next-line-number
-                     new-line-number))
-        (setq new-line-number
-              (+ current-line-number
-                 (truncate (- next-line-number current-line-number)
-                           2)))
-        (when (= new-line-number current-line-number)
-          (setq new-line-number (1+ new-line-number))))
-      (insert (int-to-string new-line-number)))
-    (mscl-indent-line)))
-
-(defun mscl-find-jumps ()
-  (let ((jump-targets (make-hash-table)))
-    (save-excursion
-      (goto-char (point-min))
-      (while (re-search-forward "\\(go\\(sub\\|to\\)\\|then\\)[ \t]*" nil t)
-        (while (looking-at "\\([0-9]+\\)\\(,[ \t]*\\)?")
-          (let* ((target-string (match-string-no-properties 1))
-                 (target (string-to-number target-string))
-                 (jmp-marker (copy-marker (+ (point) (length target-string)))))
-            (unless (gethash target jump-targets)
-              (puthash target nil jump-targets))
-            (push jmp-marker (gethash target jump-targets))
-            (forward-char (length (match-string 0)))))))
-    jump-targets))
-
-(defun mscl-renumber (start increment)
-  "Renumbers the lines of the buffer or region.
-The new numbers begin with START and use INCREMENT between
-line numbers.
-
-START defaults to the line number at the start of buffer or
-region.  If no line number is present there, it uses
-`mscl-renumber-increment' as a fallback starting point.
-
-INCREMENT defaults to `mscl-renumber-increment'.
-
-Jumps in the code are updated with the new line numbers.
-
-If the region is active, only lines within the region are
-renumbered, but jumps into the region are updated to match the
-new numbers even if the jumps are from outside the region.
-
-No attempt is made to ensure unique line numbers within the
-buffer if only the active region is renumbered.
-
-If `mscl-renumber-unnumbered-lines' is non-nil, all non-empty
-lines will get numbers.  If it is nil, only lines that already
-have numbers are included in the renumbering."
-  (interactive (list (let ((default (save-excursion
-                                      (goto-char (if (use-region-p)
-                                                     (region-beginning)
-                                                   (point-min)))
-                                      (or (mscl-current-line-number)
-                                          mscl-renumber-increment))))
-                       (string-to-number (read-string
-                                          (format "Renumber, starting with (default %d): "
-                                                  default)
-                                          nil nil
-                                          (int-to-string default))))
-                     (string-to-number (read-string
-                                        (format "Increment (default %d): "
-                                                mscl-renumber-increment)
-                                        nil nil
-                                        (int-to-string mscl-renumber-increment)))))
-  (if (zerop mscl-line-number-cols)
-      (message "No room for numbers.  Please adjust `mscl-line-number-cols'.")
-    (let ((new-line-number start)
-          (jump-list (mscl-find-jumps))
-          (point-start (if (use-region-p) (region-beginning) (point-min)))
-          (point-end (if (use-region-p) (copy-marker (region-end)) (copy-marker (point-max)))))
-      (save-excursion
-        (goto-char point-start)
-        (while (< (point) point-end)
-          (unless (looking-at "^[ \t]*$")
-            (let ((current-line-number (string-to-number (mscl-remove-line-number))))
-              (when (or mscl-renumber-unnumbered-lines
-                        (not (zerop current-line-number)))
-                (let ((jump-locations (gethash current-line-number jump-list)))
-                  (save-excursion
-                    (dolist (p jump-locations)
-                      (goto-char (marker-position p))
-                      (set-marker p nil)
-                      (backward-kill-word 1)
-                      (insert (int-to-string new-line-number)))))
-                (indent-line-to (mscl-calculate-indent))
-                (beginning-of-line)
-                (insert (mscl-format-line-number new-line-number))
-                (setq new-line-number (+ new-line-number increment)))))
-          (forward-line 1)))
-      (set-marker point-end nil)
-      (maphash (lambda (target sources)
-                 (dolist (m sources)
-                   (when (marker-position m)
-                     (set-marker m nil))))
-               jump-list))))
 
 ;; ----------------------------------------------------------------------------
 ;; Xref backend:
@@ -686,8 +498,6 @@ If VARIABLE is not found, return nil."
 (defvar mscl-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "\C-c\C-f" 'mscl-format-code)
-    (define-key map "\r" 'mscl-newline-and-number)
-    (define-key map "\C-c\C-r" 'mscl-renumber)
     (define-key map "\:" 'mscl-electric-colon)
     map)
   "Keymap used in ‘mscl-mode'.")
@@ -708,9 +518,6 @@ If VARIABLE is not found, return nil."
 Commands:
 TAB indents for MSCL code. RET will insert a new line starting
 with a fresh line number if line numbers are turned on.
-
-To turn on line numbers, customize variables `mscl-auto-number'
-and `mscl-line-number-cols'.
 
 \\{mscl-mode-map}"
   :group 'mscl
