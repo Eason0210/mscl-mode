@@ -339,6 +339,72 @@ trailing lines at the end of the buffer if the variable
         ))))
 
 ;; ----------------------------------------------------------------------------
+;; Xref backend:
+;; ----------------------------------------------------------------------------
+
+(declare-function xref-make "xref" (summary location))
+(declare-function xref-make-buffer-location "xref" (buffer point))
+
+(defun mscl-xref-backend () 'mscl)
+
+(defun mscl-xref-make-xref (summary buffer point)
+  "Return a buffer xref object with SUMMARY, BUFFER and POINT."
+  (xref-make summary (xref-make-buffer-location buffer point)))
+
+(cl-defmethod xref-backend-identifier-at-point ((_backend (eql mscl)))
+  (mscl-xref-identifier-at-point))
+
+(defun mscl-xref-identifier-at-point ()
+  "Return the relevant MSCL identifier at point."
+  (thing-at-point 'symbol t))
+
+(cl-defmethod xref-backend-definitions ((_backend (eql mscl)) identifier)
+  (mscl-xref-find-definitions identifier))
+
+(defun mscl-xref-find-definitions (identifier)
+  "Find definitions of IDENTIFIER.
+Return a list of xref objects with the definitions found.
+If no definitions can be found, return nil."
+  (let (xrefs)
+    (let ((line-number (mscl-xref-find-line-number identifier))
+          (label (mscl-xref-find-label identifier))
+          (variables (mscl-xref-find-variable identifier)))
+      (when line-number
+        (push (mscl-xref-make-xref (format "%s (line number)" identifier) (current-buffer) line-number) xrefs))
+      (when label
+        (push (mscl-xref-make-xref (format "%s (label)" identifier) (current-buffer) label) xrefs))
+      (cl-loop for variable in variables do
+               (push (mscl-xref-make-xref (format "%s (variable)" identifier) (current-buffer) variable) xrefs))
+      xrefs)))
+
+(defun mscl-xref-find-line-number (line-number)
+  "Return the buffer position where LINE-NUMBER is defined.
+If LINE-NUMBER is not found, return nil."
+  (save-excursion
+    (when (string-match "[0-9]+" line-number)
+      (goto-char (point-min))
+      (when (re-search-forward (concat "^\\s-*\\(" line-number "\\)\\s-") nil t)
+        (match-beginning 1)))))
+
+(defun mscl-xref-find-label (label)
+  "Return the buffer position where LABEL is defined.
+If LABEL is not found, return nil."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward (concat "^\\s-*\\(" label "\\):") nil t)
+      (match-beginning 1))))
+
+(defun mscl-xref-find-variable (variable)
+  "Return a list of buffer positions where VARIABLE is defined.
+If VARIABLE is not found, return nil."
+  (save-excursion
+    (goto-char (point-min))
+    (let (positions)
+      (while (re-search-forward (concat "\\_<declare\\_>.*\\_<\\(" variable "\\)\\_>") nil t)
+        (push (match-beginning 1) positions))
+      positions)))
+
+;; ----------------------------------------------------------------------------
 ;; MSCL mode:
 ;; ----------------------------------------------------------------------------
 
@@ -367,6 +433,7 @@ with a fresh line number if line numbers are turned on.
 
 \\{mscl-mode-map}"
   :group 'mscl
+  (add-hook 'xref-backend-functions #'mscl-xref-backend nil t)
   (setq-local indent-line-function 'mscl-indent-line)
   (setq-local comment-start "#")
   (setq-local font-lock-defaults '(mscl-font-lock-keywords nil t))
