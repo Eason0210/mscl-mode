@@ -49,22 +49,6 @@
 ;; (from simple.el).
 ;;
 
-;;; Change Log:
-
-;;  0.4.2  2018-09-19  Lookup of declared variables.
-;;  0.4.1  2018-06-12  Highlighting, indentation and lookup of labels.
-;;  0.4.0  2018-05-25  Added goto line number.
-;;  0.3.3  2018-05-17  Fixed endless loop bug.
-;;  0.3.2  2017-12-04  Indentation of one-line-loops.
-;;  0.3.1  2017-11-25  Renumbering on-goto and bug fixes.
-;;  0.3.0  2017-11-20  Auto-numbering and renumbering support.
-;;                     Thanks to Peder O. Klingenberg.
-;;  0.2.0  2017-10-27  Format region/buffer.
-;;  0.1.3  2017-10-11  Even more syntax highlighting.
-;;  0.1.2  2017-10-04  More syntax highlighting.
-;;  0.1.1  2017-10-02  Fixed review comments and autoload problems.
-;;  0.1.0  2017-09-28  Initial version.
-
 ;;; Code:
 
 (require 'seq)
