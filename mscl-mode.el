@@ -25,8 +25,7 @@
 ;;; Commentary:
 
 ;; This package provides a major mode for editing MSCL code.  Features
-;; include syntax highlighting and indentation, as well as support for
-;; auto-numbering and renumering of code lines.
+;; include syntax highlighting and indentation.
 ;;
 ;; You can format the region, or the entire buffer, by typing C-c C-f.
 ;;
