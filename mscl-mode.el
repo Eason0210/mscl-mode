@@ -303,13 +303,6 @@ If the current line is the first line, then return 0."
           (calculated-indent-col (mscl-calculate-indent)))
       (= original-indent-col calculated-indent-col))))
 
-(defun mscl-electric-colon ()
-  "Insert a colon and re-indent line."
-  (interactive)
-  (insert ?\:)
-  (when (not (mscl-comment-or-string-p))
-    (mscl-indent-line)))
-
 ;; ----------------------------------------------------------------------------
 ;; Formatting:
 ;; ----------------------------------------------------------------------------
@@ -365,7 +358,6 @@ trailing lines at the end of the buffer if the variable
 (defvar mscl-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "\C-c\C-f" 'mscl-format-code)
-    (define-key map "\:" 'mscl-electric-colon)
     map)
   "Keymap used in ‘mscl-mode'.")
 
