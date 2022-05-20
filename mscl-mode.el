@@ -1,6 +1,6 @@
 ;;; mscl-mode.el --- major mode for editing MSCL code
 
-;; Copyright (C) 2020 Eason Huang
+;; Copyright (C) 2020-2022 Eason Huang
 
 ;; Author: Eason Huang
 ;; Created: 2020-08-16
