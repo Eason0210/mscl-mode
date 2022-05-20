@@ -89,7 +89,7 @@ the actual code.  Set this variable to 0 if you do not use line numbers."
 ;; Variables:
 ;; ----------------------------------------------------------------------------
 
-(defconst mscl-mode-version "0.4.1"
+(defconst mscl-mode-version "1.0.0"
   "The current version of `mscl-mode'.")
 
 (defconst mscl-increase-indent-keywords-bol
