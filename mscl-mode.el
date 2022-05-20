@@ -125,10 +125,6 @@ beginning of a line or after a statement separator (:).")
   "\\_<rem\\_>.*\n"
   "Regexp string that matches a comment until the end of the line.")
 
-(defconst mscl-linenum-regexp
-  "^[ \t]*\\([0-9]+\\)"
-  "Regexp string of symbols to highlight as line numbers.")
-
 (defconst mscl-label-regexp
   "^[ \t]*\\([a-zA-Z][a-zA-Z0-9_.]*:\\)"
   "Regexp string of symbols to highlight as line numbers.")
@@ -163,7 +159,6 @@ beginning of a line or after a statement separator (:).")
 
 (defconst mscl-font-lock-keywords
   (list (list mscl-comment-regexp 0 'font-lock-comment-face)
-        (list mscl-linenum-regexp 0 'font-lock-constant-face)
         (list mscl-label-regexp 0 'font-lock-constant-face)
         (list mscl-constant-regexp 0 'font-lock-constant-face)
         (list mscl-keyword-regexp 0 'font-lock-keyword-face)
@@ -190,8 +185,7 @@ beginning of a line or after a statement separator (:).")
       ;; Move point to a good place after indentation
       (goto-char (+ (point-at-bol)
                     calculated-indent-col
-                    (max (- original-col original-indent-col) 0)
-                    mscl-line-number-cols)))))
+                    (max (- original-col original-indent-col) 0))))))
 
 (defun mscl-calculate-indent ()
   "Calculate the indent for the current line of code.
@@ -289,18 +283,13 @@ of a line or statement, see `mscl-decrease-indent-keywords-bol'."
                    (not (mscl-backslash-p))))))))
 
 (defun mscl-current-indent ()
-  "Return the indent column of the current code line.
-The columns allocated to the line number are ignored."
+  "Return the indent column of the current code line."
   (save-excursion
     (beginning-of-line)
-    ;; Skip line number and spaces
-    (skip-chars-forward "0-9 \t" (point-at-eol))
-    (let ((indent (- (point) (point-at-bol))))
-      (- indent mscl-line-number-cols))))
+    (- (point) (point-at-bol))))
 
 (defun mscl-previous-indent ()
   "Return the indent column of the previous code line.
-The columns allocated to the line number are ignored.
 If the current line is the first line, then return 0."
   (save-excursion
     (mscl-code-search-backward)
