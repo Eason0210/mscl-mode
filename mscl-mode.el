@@ -121,10 +121,6 @@ beginning of a line or after a statement separator (:).")
   '(font-lock-comment-face font-lock-comment-delimiter-face font-lock-string-face)
   "List of font-lock faces used for comments and strings.")
 
-(defconst mscl-comment-regexp
-  "\\_<rem\\_>.*\n"
-  "Regexp string that matches a comment until the end of the line.")
-
 (defconst mscl-label-regexp
   "^[ \t]*\\([a-zA-Z][a-zA-Z0-9_.]*:\\)"
   "Regexp string of symbols to highlight as line numbers.")
@@ -158,8 +154,7 @@ beginning of a line or after a statement separator (:).")
   "Regexp string of symbols to highlight as types.")
 
 (defconst mscl-font-lock-keywords
-  (list (list mscl-comment-regexp 0 'font-lock-comment-face)
-        (list mscl-label-regexp 0 'font-lock-constant-face)
+  (list (list mscl-label-regexp 0 'font-lock-constant-face)
         (list mscl-constant-regexp 0 'font-lock-constant-face)
         (list mscl-keyword-regexp 0 'font-lock-keyword-face)
         (list mscl-type-regexp 0 'font-lock-type-face)
