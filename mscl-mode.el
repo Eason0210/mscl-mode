@@ -72,13 +72,6 @@ Statements inside a block are indented this number of columns."
   :type 'integer
   :group 'mscl)
 
-(defcustom mscl-line-number-cols 0
-  "*Specifies the number of columns to allocate to line numbers.
-This number should include the single space between the line number and
-the actual code.  Set this variable to 0 if you do not use line numbers."
-  :type 'integer
-  :group 'mscl)
-
 (defcustom mscl-delete-trailing-whitespace 't
   "*Delete trailing whitespace while formatting code."
   :type 'boolean
