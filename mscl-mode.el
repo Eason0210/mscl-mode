@@ -273,7 +273,10 @@ of a line or statement, see `mscl-decrease-indent-keywords-bol'."
   "Return the indent column of the current code line."
   (save-excursion
     (beginning-of-line)
-    (- (point) (point-at-bol))))
+    ;; Skip spaces
+    (skip-chars-forward " \t" (point-at-eol))
+    (let ((indent (- (point) (point-at-bol))))
+      indent)))
 
 (defun mscl-previous-indent ()
   "Return the indent column of the previous code line.
