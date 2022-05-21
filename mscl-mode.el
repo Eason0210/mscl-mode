@@ -356,7 +356,10 @@ trailing lines at the end of the buffer if the variable
 
 (defun mscl-xref-identifier-at-point ()
   "Return the relevant MSCL identifier at point."
-  (thing-at-point 'symbol t))
+  (let ((sym (thing-at-point 'symbol t)))
+    (if (string= (substring sym 0 1) "$")
+        (substring sym 1)
+      sym)))
 
 (cl-defmethod xref-backend-definitions ((_backend (eql mscl)) identifier)
   (mscl-xref-find-definitions identifier))
