@@ -7,7 +7,7 @@
 ;; Version: 1.0.0
 ;; Keywords: mscl, languages
 ;; URL: https://github.com/Eason0210/mscl-mode
-;; Package-Requires: ((seq "2.20") (emacs "24.3"))
+;; Package-Requires: ((seq "2.23") (emacs "29"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ beginning of a line or after a statement separator (:).")
       ;; Indent line
       (indent-line-to calculated-indent-col)
       ;; Move point to a good place after indentation
-      (goto-char (+ (point-at-bol)
+      (goto-char (+ (pos-bol)
                     calculated-indent-col
                     (max (- original-col original-indent-col) 0))))))
 
@@ -247,7 +247,7 @@ while other keywords do it when found at the beginning of a line."
           't
         ;; Keywords at the beginning of the line
         (beginning-of-line)
-        (re-search-forward "[^0-9 \t\n]" (point-at-eol) t)
+        (re-search-forward "[^0-9 \t\n]" (pos-eol) t)
         (mscl-match-symbol-at-point-p mscl-increase-indent-keywords-bol)))))
 
 (defun mscl-decrease-indent-p ()
@@ -256,13 +256,13 @@ Some keywords trigger un-indentation when found at the beginning
 of a line or statement, see `mscl-decrease-indent-keywords-bol'."
   (save-excursion
     (beginning-of-line)
-    (re-search-forward "[^0-9 \t\n]" (point-at-eol) t)
+    (re-search-forward "[^0-9 \t\n]" (pos-eol) t)
     (or (mscl-match-symbol-at-point-p mscl-decrease-indent-keywords-bol)
         (let ((match nil))
           (mscl-code-search-backward)
           (beginning-of-line)
           (while (and (not match)
-                      (re-search-forward ":[ \t\n]*" (point-at-eol) t))
+                      (re-search-forward ":[ \t\n]*" (pos-eol) t))
             (setq match (mscl-match-symbol-at-point-p mscl-decrease-indent-keywords-bol)))
           (or match
               ;; when find "\" in the end of previous line but not in current line.
@@ -274,8 +274,8 @@ of a line or statement, see `mscl-decrease-indent-keywords-bol'."
   (save-excursion
     (beginning-of-line)
     ;; Skip spaces
-    (skip-chars-forward " \t" (point-at-eol))
-    (let ((indent (- (point) (point-at-bol))))
+    (skip-chars-forward " \t" (pos-eol))
+    (let ((indent (- (point) (pos-bol))))
       indent)))
 
 (defun mscl-previous-indent ()
