@@ -1,8 +1,7 @@
 # mscl-mode
 
 Package mscl-mode provides a major mode for editing MSCL code in GNU Emacs.
-Features include syntax highlighting and indentation, as well as support for
-auto-numbering and renumering of code lines.
+Features include syntax highlighting and indentation.
 
 
 ## Installation

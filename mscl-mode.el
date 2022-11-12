@@ -422,8 +422,7 @@ If VARIABLE is not found, return nil."
 (define-derived-mode mscl-mode prog-mode "MSCL"
   "Major mode for editing MSCL code.
 Commands:
-TAB indents for MSCL code.  RET will insert a new line starting
-with a fresh line number if line numbers are turned on.
+TAB indents for MSCL code.
 
 \\{mscl-mode-map}"
   :group 'mscl
