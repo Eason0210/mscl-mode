@@ -1,4 +1,4 @@
-;;; mscl-mode.el --- major mode for editing MSCL code
+;;; mscl-mode.el --- major mode for editing MSCL code -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2020-2022 Eason Huang
 
