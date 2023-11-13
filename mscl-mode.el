@@ -4,7 +4,7 @@
 
 ;; Author: Eason Huang
 ;; Created: 2020-08-16
-;; Version: 1.0.0
+;; Version: 1.1.1
 ;; Keywords: mscl, languages
 ;; URL: https://github.com/Eason0210/mscl-mode
 ;; Package-Requires: ((seq "2.23") (emacs "29"))
@@ -81,7 +81,7 @@ Statements inside a block are indented this number of columns."
 ;; Variables:
 ;; ----------------------------------------------------------------------------
 
-(defconst mscl-mode-version "1.0.0"
+(defconst mscl-mode-version "1.1.1"
   "The current version of `mscl-mode'.")
 
 (defconst mscl-increase-indent-keywords-bol
