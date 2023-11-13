@@ -412,6 +412,7 @@ If VARIABLE is not found, return nil."
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?_   "w   " table)
     (modify-syntax-entry ?\.  "w   " table)
+    (modify-syntax-entry ?\\  "w   " table)
     (modify-syntax-entry ?#   "<   " table)
     (modify-syntax-entry ?\n  ">   " table)
     (modify-syntax-entry ?\^m ">   " table)
